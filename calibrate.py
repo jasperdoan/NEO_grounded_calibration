@@ -42,7 +42,7 @@ def erase_config(odrv_num, clear):
         try:
             odrive.find_any(serial_number=odrv_num).erase_configuration()
             print("\tErased Previous Configuration... 🗑️")
-        except:
+        except ObjectLostError:
             print("\tFailed to Erased Previous Configuration... 🗑️")
             pass
     return odrive.find_any(serial_number=odrv_num)
@@ -67,9 +67,7 @@ def save_config(odrv_num):
 
 def config_motor(odrv_num, axis_num, clear, powerDC):
     odrv = odrive.find_any(serial_number=odrv_num)
-    axis = getattr(odrv, f'axis{axis_num}')
     vbus_voltage = odrv.vbus_voltage
-
 
 
     # ==== CLEAR PREVIOUS CONFIGURATION ================================
@@ -78,6 +76,8 @@ def config_motor(odrv_num, axis_num, clear, powerDC):
     print(">>> ODrive's SN:\t", odrv_num, "<<<")
     print(">>> ODrive's Voltage:\t", vbus_voltage, "<<<")
 
+
+    axis = getattr(odrv, f'axis{axis_num}')
 
 
     # ==== ODRIVE CONFIGURATION ========================================
@@ -118,7 +118,7 @@ def config_motor(odrv_num, axis_num, clear, powerDC):
     axis.motor.config.current_lim = 100                         # Maximum current that the motor can draw
     axis.motor.config.torque_constant = 8.27 / 473              # Brushless NEO motors have a torque constant of 8.27 mNm/Amp 
                                                                 #   and 473 is Kv of our neo motor. (Kv = RPM at max throttle)
-
+    axis.motor.config.calibration_current = 5
     # ------------------------------------------------------------------
     #   Encoder Configuration:
     #       Mode:               Encoder mode
@@ -214,10 +214,7 @@ def calib_motor(odrv_num, axis_num):
     axis.controller.config.control_mode = 2 # CONTROL_MODE_VELOCITY_CONTROL
 
     # ---- Target List ------------------------------------------------
-    a = {
-        "motor" : axis.motor,
-        "encoder" : axis.encoder
-    }
+    a = { "motor" : axis.motor, "encoder" : axis.encoder }
 
     c = {
         "Motor State"   : [AXIS_STATE_MOTOR_CALIBRATION, a["motor"].error],

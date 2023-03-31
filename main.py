@@ -1,4 +1,4 @@
-from .calibrate import *
+from calibrate import *
 
 
 class OriveNEO:
@@ -27,10 +27,11 @@ def main():
     neo = OriveNEO(odrv)
 
     while True:
+        print("Spinning")
         neo.close_loop_control()
-        neo.set_motor_velocity(10)
+        neo.set_motor_velocity(5)
         time.sleep(5)
-        
+        print("Sleeping")
         neo.set_motor_velocity(0)
         neo.idle_state()
         time.sleep(5)
